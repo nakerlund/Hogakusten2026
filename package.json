@@ -1,0 +1,14 @@
+{
+  "name": "hogakusten2026",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:slides": "marp README.md --html"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "4.5.1"
+  },
+  "overrides": {
+    "@xmldom/xmldom": "0.9.12"
+  }
+}

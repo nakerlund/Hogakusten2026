@@ -1,5 +1,3 @@
-# Hogakusten2026
-
 ---
 marp: true
 theme: default
@@ -31,7 +29,8 @@ Marp-powered project presentation published with GitHub Pages.
 ## Local preview
 
 ```bash
-npx @marp-team/marp-cli@latest README.md --html --output index.html
+npm ci
+npm run build:slides -- --output dist/index.html
 ```
 
-Open `index.html` in a browser to preview the slides locally.
+Open `dist/index.html` in a browser to preview the slides locally.
