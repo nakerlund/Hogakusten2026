@@ -23,6 +23,7 @@ style: |
   }
   table { width: 100%; font-size: 20px; }
   th { color: #ff6a2a; }
+  td { color: #061521; }
   td, th { border-color: #42606e; padding: 12px; }
   footer { color: #a9c1cc; }
 ---
