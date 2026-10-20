@@ -30,7 +30,15 @@ button.sec,select{background:transparent;color:var(--fg);border:1px solid var(--
 select option{color:#000}
 .badge{display:inline-block;padding:2px 10px;border-radius:12px;background:#183347;font-size:.85rem}
 .pri{color:var(--acc);font-weight:700}
-@media print{body{background:#fff;color:#000}.card{border-color:#999;background:#fff}.noprint,.sticky{display:none}.opts label:not(:has(input:checked)){display:none}}
+.help{color:var(--mute);font-size:.9rem;margin:6px 0 0}
+.role{display:inline-block;font-size:.75rem;border:1px solid var(--acc);color:var(--acc);border-radius:10px;padding:0 8px;margin-left:6px}
+.gf{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:8px}
+.gf label{font-size:.8rem;color:var(--mute);display:block}
+.gf input{width:100%;background:#0a1b2a;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px;font:inherit}
+.wiz label.q{display:block;margin-top:10px;font-weight:600}
+.wiz select{margin-top:4px}
+#verdict{font-weight:600;margin-top:12px}
+@media print{.gf input{background:#fff;color:#000;border-color:#999}#form,#s2,.wiz{display:none}body{background:#fff;color:#000}.card{border-color:#999;background:#fff}.noprint,.sticky{display:none}.opts label:not(:has(input:checked)){display:none}}
 </style>
 </head>
 <body>
@@ -43,8 +51,23 @@ select option{color:#000}
 </div>
 </header>
 <main>
+<section aria-labelledby="s0">
+<h2 id="s0">1. Does the CRA apply to you?</h2>
+<div class="card wiz">
+<label class="q" for="w1">Does your product contain software or hardware that connects, directly or indirectly, to a device or network?</label>
+<select id="w1"><option value="">Choose…</option><option value="y">Yes</option><option value="n">No (standalone, no data connection)</option></select>
+<label class="q" for="w2">Is the product already covered by sector rules that exclude it from the CRA (medical devices, vehicles, aviation, marine equipment)?</label>
+<select id="w2"><option value="">Choose…</option><option value="n">No</option><option value="y">Yes</option></select>
+<label class="q" for="w3">What is your role?</label>
+<select id="w3"><option value="">Choose…</option><option value="m">Manufacturer – we design/build or brand the product</option><option value="i">Importer – we bring non-EU products to the EU market</option><option value="d">Distributor – we resell products on the EU market</option><option value="u">Integrator – we build third-party connected modules into our product</option></select>
+<label class="q" for="w4">Does the product's core function appear in the lists of security-critical products (e.g. firewall, router, VPN, hypervisor, smart-meter gateway)?</label>
+<select id="w4"><option value="">Choose…</option><option value="n">No / not sure</option><option value="I">Yes – Class I type</option><option value="II">Yes – Class II type</option><option value="crit">Yes – Critical type</option></select>
+<p id="verdict" aria-live="polite"></p>
+<p class="help">Production companies that integrate connected machines, gateways or controllers are normally manufacturers of the final product and must also vet the components they build in. This is guidance, confirm borderline cases with legal counsel.</p>
+</div>
+</section>
 <section aria-labelledby="s1">
-<h2 id="s1">1. Your product class</h2>
+<h2 id="s1">2. Your product class</h2>
 <div class="card">
 <label for="cls">Select the class that fits your product (Annex III/IV of the CRA):</label><br>
 <select id="cls">
@@ -58,19 +81,19 @@ select option{color:#000}
 </section>
 
 <section aria-labelledby="s2">
-<h2 id="s2">2. Maturity self-assessment</h2>
+<h2 id="s2">3. Maturity self-assessment</h2>
 <p class="mute">Rate each statement: <b>0</b> Not started · <b>1</b> Ad hoc · <b>2</b> Defined/documented · <b>3</b> Implemented &amp; evidenced · <b>4</b> Verified, monitored &amp; improved. “N/A” excludes a question.</p>
 <div class="sticky noprint"><div class="bar" role="progressbar" id="pb" aria-label="Completion" aria-valuemin="0" aria-valuemax="100"><span></span></div><div id="pbt" class="mute" aria-live="polite"></div></div>
 <div id="form"></div>
 </section>
 
 <section aria-labelledby="s3">
-<h2 id="s3">3. Results</h2>
+<h2 id="s3">4. Results and action plan</h2>
 <div class="card" id="res" aria-live="polite"></div>
 <h3>Priority gaps</h3>
 <div id="gaps"></div>
 <p class="noprint">
-<button id="print">Print / save as PDF</button>
+<button id="print">Print action plan / save as PDF</button>
 <button id="exp" class="sec">Export JSON</button>
 <button id="reset" class="sec">Reset</button>
 </p>
@@ -113,6 +136,31 @@ const DOMAINS=[
 ["Harmonised standards or common specifications are tracked and applied where available.","Art. 27","Follow CEN/CENELEC work; use ISO/IEC 27001, IEC 62443-4-1/4-2 as interim evidence."]]}
 ];
 const CLS={default:"Default products can use internal control (Module A) self-assessment.",I:"Class I: apply harmonised standards in full, or use third-party assessment (EU type-examination + production control, or full quality assurance).",II:"Class II: third-party assessment by a notified body is mandatory.",crit:"Critical: European cybersecurity certification (EUCC-type scheme) may be required; notified-body involvement is expected."};
+const EX={
+gov0:["List every product you sell and note whether it has a data connection. This is the starting point for everything else.","Product owner"],
+gov1:["Decide who is accountable. The CRA puts duties on the manufacturer, but importers and distributors have checks too.","Product owner"],
+gov2:["Decide how long you will deliver security updates (min. 5 years unless the product lives shorter) and tell customers.","Product owner"],
+gov3:["Check that suppliers and open-source parts are maintained and secure; you are responsible for them in your product.","Procurement / Engineering"],
+sbd0:["Write down what could go wrong with the product and how you counter it. This drives the design.","Engineering"],
+sbd1:["Ship with safe settings: no shared default passwords, no known exploitable flaws.","Engineering"],
+sbd2:["Only authorised people and systems may use the product's functions.","Engineering"],
+sbd3:["Encrypt data on the wire and in storage; collect only what you need.","Engineering"],
+sbd4:["Turn off what is not needed and make the product robust against attacks.","Engineering"],
+sbd5:["Keep security logs and let users wipe their data and settings.","Engineering"],
+vuln0:["A list of software components per release, in a standard machine-readable format.","Engineering"],
+vuln1:["Watch for new flaws in your components, fix them quickly and test regularly.","Engineering / Quality"],
+vuln2:["Tell researchers how to report a flaw and who to contact.","Product owner / Legal"],
+vuln3:["Updates must be free, and users must be told about security fixes.","Product owner / Engineering"],
+rep0:["Know how you would learn that a flaw is being exploited or a serious incident occurred.","Product owner / Engineering"],
+rep1:["Be ready to report to authorities within 24 h, 72 h and then with a final report.","Product owner / Legal"],
+rep2:["Plan how you inform customers and what you tell them to do.","Product owner"],
+doc0:["The technical file: design, risk assessment, tests, SBOM. Keep for 10 years or the support period.","Quality / Engineering"],
+doc1:["A clear manual: how to set up securely, update, contact you and decommission.","Product owner / Documentation"],
+doc2:["Product marking with model/serial and your name and contact details.","Product owner / Quality"],
+conf0:["Class decides if you may self-assess or need a notified body. Book third-party bodies early.","Product owner / Quality"],
+conf1:["Sign the EU Declaration of Conformity and apply the CE mark, only after the evidence is in place.","Product owner / Legal"],
+conf2:["Combine CRA evidence with other rules you already follow (RED, Machinery, GDPR) to avoid duplicate work.","Quality / Legal"],
+conf3:["Standards (e.g. IEC 62443-4-1, ISO 27001) help show compliance. Track new harmonised standards.","Quality / Engineering"]};
 const LV=["Not started","Ad hoc","Defined","Implemented","Optimised"];
 const KEY="cra-check-v1";
 let st=JSON.parse(localStorage.getItem(KEY)||"{}");
@@ -128,7 +176,9 @@ function build(){
    const id=d.id+i,c=document.createElement("div");c.className="card";
    const fs=document.createElement("fieldset"),lg=document.createElement("legend");
    lg.textContent=q[0];fs.append(lg);
-   const r=document.createElement("div");r.className="ref";r.textContent=q[1];fs.append(r);
+   const r=document.createElement("div");r.className="ref";r.textContent=q[1];
+   const rl=document.createElement("span");rl.className="role";rl.textContent=EX[id][1];r.append(rl);fs.append(r);
+   const hp=document.createElement("p");hp.className="help";hp.textContent=EX[id][0];fs.append(hp);
    const o=document.createElement("div");o.className="opts";
    [0,1,2,3,4,"N/A"].forEach(v=>{
     const l=document.createElement("label"),inp=document.createElement("input");
@@ -148,7 +198,7 @@ function calc(){
   d.qs.forEach((q,i)=>{
    tot++;const v=st.a[d.id+i];if(v===undefined)return;ans++;
    if(v==="N/A")return;
-   s+=+v;n++;if(+v<3)gaps.push({lv:+v,t:q[0],a:q[2],r:q[1],d:d.name});
+   s+=+v;n++;if(+v<3)gaps.push({id:d.id+i,lv:+v,t:q[0],a:q[2],r:q[1],d:d.name});
   });
   const p=n?s/(n*4)*100:0;sum+=s;cnt+=n;
   html+=`<div class="row"><div>${d.name}<div class="bar" role="img" aria-label="${Math.round(p)}%"><span style="width:${p}%"></span></div></div><div>${n?Math.round(p)+"%":"–"}</div></div>`;
@@ -157,15 +207,31 @@ function calc(){
  const lvl=!cnt?"Not assessed":pct>=85?"Optimised":pct>=65?"Implemented":pct>=40?"Defined":pct>=15?"Ad hoc":"Not started";
  $("#res").innerHTML=`<p>Overall readiness: <strong style="font-size:1.6rem">${Math.round(pct)}%</strong> <span class="badge">${lvl}</span></p>${html}<p class="mute">Product class: ${CLS[st.cls]}</p>`;
  gaps.sort((a,b)=>a.lv-b.lv);
- $("#gaps").innerHTML=gaps.length?gaps.slice(0,15).map(g=>`<div class="card"><span class="pri">Level ${g.lv}</span> · ${g.d}<br>${g.t}<br><strong>Action:</strong> ${g.a} <span class="ref">(${g.r})</span></div>`).join(""):`<p class="mute">No gaps below level 3 yet.</p>`;
+ st.g=st.g||{};
+ const gv=(id,k)=>(st.g[id]&&st.g[id][k])||"";
+ const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ gaps.sort((a,b)=>(gv(a.id,"due")||"9999").localeCompare(gv(b.id,"due")||"9999")||a.lv-b.lv);
+ $("#gaps").innerHTML=gaps.length?gaps.map(g=>`<div class="card"><span class="pri">Level ${g.lv}</span> · ${g.d}<span class="role">${esc(EX[g.id][1])}</span><br>${g.t}<br><strong>Action:</strong> ${g.a} <span class="ref">(${g.r})</span>
+ <div class="gf"><label>Owner<input data-g="${g.id}" data-k="owner" value="${esc(gv(g.id,"owner"))}"></label><label>Due date<input type="date" data-g="${g.id}" data-k="due" value="${esc(gv(g.id,"due"))}"></label><label>Evidence (link or document)<input data-g="${g.id}" data-k="ev" value="${esc(gv(g.id,"ev"))}"></label></div></div>`).join(""):`<p class="mute">No gaps below level 3 yet.</p>`;
  const pr=Math.round(ans/tot*100);
  $("#pb span").style.width=pr+"%";$("#pb").setAttribute("aria-valuenow",pr);$("#pbt").textContent=`${ans} of ${tot} answered`;
 }
+$("#gaps").addEventListener("change",e=>{const t=e.target;if(!t.dataset.g)return;st.g[t.dataset.g]=st.g[t.dataset.g]||{};st.g[t.dataset.g][t.dataset.k]=t.value;save();if(t.dataset.k==="due")calc()});
+function wiz(){
+ st.w=st.w||{};["w1","w2","w3","w4"].forEach(k=>{const e=$("#"+k);if(e.dataset.init!=="1"){e.value=st.w[k]||"";e.dataset.init="1";e.onchange=()=>{st.w[k]=e.value;save();wiz()}}});
+ const w=st.w,v=$("#verdict");
+ if(w.w1==="n"){v.textContent="Likely out of scope: no data connection. Document this decision.";return}
+ if(w.w2==="y"){v.textContent="Likely excluded: covered by sector legislation. Document this and check that regime instead.";return}
+ if(!w.w1||!w.w2||!w.w3){v.textContent="";return}
+ const roles={m:"manufacturer: you carry the full set of obligations.",i:"importer: verify the manufacturer did conformity assessment, CE mark and documentation before placing on market.",d:"distributor: verify CE marking, instructions and manufacturer/importer details; act on known non-compliance.",u:"integrator: you are the manufacturer of the final product and must do due diligence on integrated components."};
+ v.textContent="Likely in scope. Your role: "+roles[w.w3];
+ if(w.w4&&w.w4!=="n"&&$("#cls").value==="default"){$("#cls").value=w.w4;calc()}
+}
 $("#cls").onchange=calc;
 $("#print").onclick=()=>print();
-$("#reset").onclick=()=>{if(confirm("Clear all answers?")){st={a:{},cls:"default"};save();build();calc()}};
+$("#reset").onclick=()=>{if(confirm("Clear all answers?")){localStorage.removeItem(KEY);location.reload()}};
 $("#exp").onclick=()=>{const b=new Blob([JSON.stringify({date:new Date().toISOString(),...st},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="cra-readiness.json";a.click();URL.revokeObjectURL(a.href)};
-build();calc();
+build();calc();wiz();
 </script>
 </body>
 </html>
