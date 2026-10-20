@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRA Readiness Check · Sigma Connectivity</title>
+<style>
+:root{--bg:#061521;--card:#0d2234;--line:#2a4557;--fg:#f4f8fa;--mute:#a9c1cc;--acc:#ff6a2a;--ok:#3ecf8e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,Arial,sans-serif}
+header,main,footer{max-width:960px;margin:auto;padding:0 20px}
+header{padding-top:32px}
+h1{margin:0 0 6px;font-size:2rem}h2{border-bottom:3px solid var(--acc);padding-bottom:6px;margin-top:2rem}
+.mute{color:var(--mute)}a{color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+fieldset{border:0;padding:0;margin:0}
+legend{font-weight:600;padding:0}
+.ref{font-size:.8rem;color:var(--mute)}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.opts label{border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.9rem}
+.opts input{position:absolute;opacity:0}
+.opts label:has(input:checked){background:var(--acc);border-color:var(--acc);color:#061521;font-weight:600}
+.opts label:has(input:focus-visible){outline:3px solid #fff}
+.bar{height:12px;background:#183347;border-radius:6px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--acc)}
+.row{display:grid;grid-template-columns:1fr 90px;gap:10px;align-items:center;margin:8px 0}
+.sticky{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:2;border-bottom:1px solid var(--line)}
+button,select{background:var(--acc);color:#061521;border:0;border-radius:6px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;margin-right:6px}
+button.sec,select{background:transparent;color:var(--fg);border:1px solid var(--line)}
+select option{color:#000}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;background:#183347;font-size:.85rem}
+.pri{color:var(--acc);font-weight:700}
+@media print{body{background:#fff;color:#000}.card{border-color:#999;background:#fff}.noprint,.sticky{display:none}.opts label:not(:has(input:checked)){display:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>CRA Readiness Check</h1>
+<p class="mute">Cyber Resilience Act (Regulation (EU) 2024/2847) self-assessment for production companies placing products with digital elements on the EU market. By Sigma Connectivity.</p>
+<div class="card">
+<strong>Key dates:</strong> vulnerability and incident reporting to ENISA/CSIRTs applies from <strong>11 Sep 2026</strong>; conformity assessment bodies from 11 Jun 2026; all other obligations, including CE marking, from <strong>11 Dec 2027</strong>.
+<p class="mute" style="margin:.5em 0 0">Any product with a data connection (direct or indirect) to a device or network is likely in scope. Exceptions exist, e.g. products already covered by medical-device, automotive or aviation rules, and non-commercial open source.</p>
+</div>
+</header>
+<main>
+<section aria-labelledby="s1">
+<h2 id="s1">1. Your product class</h2>
+<div class="card">
+<label for="cls">Select the class that fits your product (Annex III/IV of the CRA):</label><br>
+<select id="cls">
+<option value="default">Default – most products (self-assessment, Module A)</option>
+<option value="I">Important Class I – e.g. identity management, browsers, password managers, VPNs, routers, smart-home with security function</option>
+<option value="II">Important Class II – e.g. hypervisors, firewalls, intrusion detection, tamper-resistant microcontrollers</option>
+<option value="crit">Critical – e.g. hardware security boxes, smart-meter gateways, smartcards</option>
+</select>
+<p id="clsinfo" class="mute"></p>
+</div>
+</section>
+
+<section aria-labelledby="s2">
+<h2 id="s2">2. Maturity self-assessment</h2>
+<p class="mute">Rate each statement: <b>0</b> Not started · <b>1</b> Ad hoc · <b>2</b> Defined/documented · <b>3</b> Implemented &amp; evidenced · <b>4</b> Verified, monitored &amp; improved. “N/A” excludes a question.</p>
+<div class="sticky noprint"><div class="bar" role="progressbar" id="pb" aria-label="Completion" aria-valuemin="0" aria-valuemax="100"><span></span></div><div id="pbt" class="mute" aria-live="polite"></div></div>
+<div id="form"></div>
+</section>
+
+<section aria-labelledby="s3">
+<h2 id="s3">3. Results</h2>
+<div class="card" id="res" aria-live="polite"></div>
+<h3>Priority gaps</h3>
+<div id="gaps"></div>
+<p class="noprint">
+<button id="print">Print / save as PDF</button>
+<button id="exp" class="sec">Export JSON</button>
+<button id="reset" class="sec">Reset</button>
+</p>
+<p class="mute noprint">Answers stay in your browser (localStorage); nothing is sent anywhere.</p>
+</section>
+</main>
+<footer><p class="mute">This tool is guidance, not legal advice, and does not replace a conformity assessment. Check the official text on <a href="https://eur-lex.europa.eu/eli/reg/2024/2847/oj">EUR-Lex</a>.</p></footer>
+
+<script>
+const DOMAINS=[
+{id:"gov",name:"Governance & scoping",qs:[
+["Products with digital elements are inventoried and in-scope status and product class are determined.","Art. 2, 7, 8","Create a product inventory and document the scoping/classification decision per product."],
+["Roles are assigned (manufacturer, importer, distributor) and a named CRA owner exists.","Art. 13, 18–20","Assign a CRA owner and map your role per product; importers/distributors need their own checks."],
+["Support period (at least 5 years unless product life is shorter) is defined and communicated.","Art. 13(8)","Define the support period per product and publish it to users."],
+["Components from third parties (incl. open source) are assessed for due diligence.","Art. 13(5)","Add supplier/component due-diligence to procurement and design reviews."]]},
+{id:"sbd",name:"Secure by design (Annex I Part I)",qs:[
+["A cybersecurity risk assessment is documented and drives design and the update plan.","Art. 13(2–3)","Perform and document a threat model/risk assessment per product; revisit at each major change."],
+["Products ship without known exploitable vulnerabilities and with secure-by-default configuration.","Annex I(1)(2)(a–b)","Add release gates: vulnerability scan, hardened defaults, no default shared passwords."],
+["Access control, authentication and protection against unauthorised access are implemented.","Annex I(2)(d)","Implement unique credentials, role-based access and strong authentication."],
+["Data is protected with state-of-the-art encryption in transit and at rest; data minimisation applied.","Annex I(2)(e–g)","Use current TLS and storage encryption; remove unnecessary data collection."],
+["Attack surface is minimised, resilience (e.g. against DoS) and exploit mitigation are designed in.","Annex I(2)(h–j)","Disable unused ports/services; add rate limiting and memory-safety mitigations."],
+["Security-relevant events are logged and users can securely remove data and settings.","Annex I(2)(l–m)","Add security logging with opt-out and a secure factory reset / data removal."]]},
+{id:"vuln",name:"Vulnerability handling (Annex I Part II)",qs:[
+["A Software Bill of Materials (SBOM) in a machine-readable format (SPDX/CycloneDX) is produced per release.","Annex I Part II(1)","Generate SBOMs in CI for every release and keep them with technical documentation."],
+["Vulnerabilities are identified, tracked and remediated without delay, with regular security testing.","Part II(2–3)","Set up component monitoring, triage SLAs and periodic penetration/security tests."],
+["A coordinated vulnerability disclosure policy and a public contact point exist.","Part II(5–6)","Publish a disclosure policy and security.txt/contact address."],
+["Security updates are provided free of charge, separately from feature updates where feasible, with advisories.","Part II(7–8), (4)","Build a secure OTA/update mechanism with automatic updates enabled by default and opt-out."]]},
+{id:"rep",name:"Incident & vulnerability reporting",qs:[
+["A process exists to detect actively exploited vulnerabilities and severe incidents.","Art. 14","Define detection criteria and an on-call route to the CRA owner."],
+["You can submit an early warning within 24 h, a notification within 72 h and a final report (14 days / 1 month).","Art. 14(2)","Draft templates and rehearse; register on the ENISA single reporting platform when available."],
+["Affected users are informed about incidents and mitigations.","Art. 14(8)","Prepare user communication templates and channels."]]},
+{id:"doc",name:"Documentation & user information",qs:[
+["Technical documentation (Annex VII) is complete and kept for 10 years or the support period, whichever is longer.","Art. 13(13), Annex VII","Create a documentation template: design, risk assessment, test reports, SBOM, DoC."],
+["User instructions (Annex II) cover contact point, intended use, secure setup, update and decommissioning.","Annex II","Produce Annex II instructions in languages easily understood by users."],
+["Product is marked with type/batch/serial identification and manufacturer name and contact.","Art. 13(15–16)","Add identification and contact details on product or packaging."]]},
+{id:"conf",name:"Conformity assessment & CE marking",qs:[
+["The correct conformity procedure is chosen for your class (Module A, EU type-examination, or certification).","Art. 32","Confirm the procedure; for Class II/critical engage a notified body early."],
+["An EU Declaration of Conformity is drawn up (Annex V) and CE marking affixed.","Art. 28–30","Prepare the DoC template and add the CE marking step to release sign-off."],
+["Other applicable legislation (e.g. RED delegated act, Machinery, GDPR) is aligned with CRA evidence.","Art. 2, recital","Map overlaps; reuse RED (EN 18031) evidence where applicable."],
+["Harmonised standards or common specifications are tracked and applied where available.","Art. 27","Follow CEN/CENELEC work; use ISO/IEC 27001, IEC 62443-4-1/4-2 as interim evidence."]]}
+];
+const CLS={default:"Default products can use internal control (Module A) self-assessment.",I:"Class I: apply harmonised standards in full, or use third-party assessment (EU type-examination + production control, or full quality assurance).",II:"Class II: third-party assessment by a notified body is mandatory.",crit:"Critical: European cybersecurity certification (EUCC-type scheme) may be required; notified-body involvement is expected."};
+const LV=["Not started","Ad hoc","Defined","Implemented","Optimised"];
+const KEY="cra-check-v1";
+let st=JSON.parse(localStorage.getItem(KEY)||"{}");
+st.a=st.a||{};st.cls=st.cls||"default";
+const $=s=>document.querySelector(s);
+const save=()=>localStorage.setItem(KEY,JSON.stringify(st));
+function build(){
+ $("#cls").value=st.cls;
+ const f=$("#form");f.innerHTML="";
+ DOMAINS.forEach(d=>{
+  const h=document.createElement("h3");h.textContent=d.name;f.append(h);
+  d.qs.forEach((q,i)=>{
+   const id=d.id+i,c=document.createElement("div");c.className="card";
+   const fs=document.createElement("fieldset"),lg=document.createElement("legend");
+   lg.textContent=q[0];fs.append(lg);
+   const r=document.createElement("div");r.className="ref";r.textContent=q[1];fs.append(r);
+   const o=document.createElement("div");o.className="opts";
+   [0,1,2,3,4,"N/A"].forEach(v=>{
+    const l=document.createElement("label"),inp=document.createElement("input");
+    inp.type="radio";inp.name=id;inp.value=v;inp.checked=st.a[id]===String(v);
+    inp.onchange=()=>{st.a[id]=String(v);save();calc()};
+    l.append(inp,document.createTextNode(v===  "N/A"?"N/A":v+" "+LV[v]));o.append(l);
+   });
+   fs.append(o);c.append(fs);f.append(c);
+  });
+ });
+}
+function calc(){
+ st.cls=$("#cls").value;save();$("#clsinfo").textContent=CLS[st.cls];
+ let tot=0,ans=0,sum=0,cnt=0,gaps=[],html="";
+ DOMAINS.forEach(d=>{
+  let s=0,n=0;
+  d.qs.forEach((q,i)=>{
+   tot++;const v=st.a[d.id+i];if(v===undefined)return;ans++;
+   if(v==="N/A")return;
+   s+=+v;n++;if(+v<3)gaps.push({lv:+v,t:q[0],a:q[2],r:q[1],d:d.name});
+  });
+  const p=n?s/(n*4)*100:0;sum+=s;cnt+=n;
+  html+=`<div class="row"><div>${d.name}<div class="bar" role="img" aria-label="${Math.round(p)}%"><span style="width:${p}%"></span></div></div><div>${n?Math.round(p)+"%":"–"}</div></div>`;
+ });
+ const pct=cnt?sum/(cnt*4)*100:0;
+ const lvl=!cnt?"Not assessed":pct>=85?"Optimised":pct>=65?"Implemented":pct>=40?"Defined":pct>=15?"Ad hoc":"Not started";
+ $("#res").innerHTML=`<p>Overall readiness: <strong style="font-size:1.6rem">${Math.round(pct)}%</strong> <span class="badge">${lvl}</span></p>${html}<p class="mute">Product class: ${CLS[st.cls]}</p>`;
+ gaps.sort((a,b)=>a.lv-b.lv);
+ $("#gaps").innerHTML=gaps.length?gaps.slice(0,15).map(g=>`<div class="card"><span class="pri">Level ${g.lv}</span> · ${g.d}<br>${g.t}<br><strong>Action:</strong> ${g.a} <span class="ref">(${g.r})</span></div>`).join(""):`<p class="mute">No gaps below level 3 yet.</p>`;
+ const pr=Math.round(ans/tot*100);
+ $("#pb span").style.width=pr+"%";$("#pb").setAttribute("aria-valuenow",pr);$("#pbt").textContent=`${ans} of ${tot} answered`;
+}
+$("#cls").onchange=calc;
+$("#print").onclick=()=>print();
+$("#reset").onclick=()=>{if(confirm("Clear all answers?")){st={a:{},cls:"default"};save();build();calc()}};
+$("#exp").onclick=()=>{const b=new Blob([JSON.stringify({date:new Date().toISOString(),...st},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="cra-readiness.json";a.click();URL.revokeObjectURL(a.href)};
+build();calc();
+</script>
+</body>
+</html>

@@ -40,7 +40,8 @@ jobs:
       - name: Generate Marp presentation
         run: |
           mkdir -p dist
-          npm run build:slides -- --output dist/index.html
+          npm run build:slides -- --output dist/slides.html
+          cp site/index.html dist/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
